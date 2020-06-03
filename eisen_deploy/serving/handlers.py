@@ -4,11 +4,20 @@ import torch
 import pickle
 import json
 
-from eisen_deploy.utils import json_file_to_dict
 from eisen.utils import EisenModuleWrapper
 
 
 logger = logging.getLogger(__name__)
+
+
+def json_file_to_dict(json_file):
+    if not os.path.exists(json_file):
+        raise FileNotFoundError('The JSON file {} cannot be read'.format(json_file))
+
+    with open(json_file) as json_file:
+        dictionary = json.load(json_file)
+
+    return dictionary
 
 
 class EisenServingHandler(object):
