@@ -13,7 +13,8 @@ logger = logging.getLogger(__name__)
 
 class EisenServingHandler(object):
     """
-
+    EisenServingHandler is a custom object to handle inference request within TorchServing. It is usually included
+    automatically in the MAR.
     """
 
     def __init__(self):
@@ -27,6 +28,12 @@ class EisenServingHandler(object):
         self.output_name_list = []
 
     def initialize(self, ctx):
+        """
+        Initializes the fields of the EisenServingHandler object based on the context.
+
+        :param ctx: context of an inference request
+        :return: None
+        """
         properties = ctx.system_properties
 
         self.device = torch.device("cuda:" + str(properties.get("gpu_id")) if torch.cuda.is_available() else "cpu")
@@ -63,7 +70,6 @@ class EisenServingHandler(object):
             self.output_name_list.append(entry['name'])
 
         # deserialize pytorch model
-        # todo check torchscript will work
         base_model = torch.load(model_pt_path, map_location=self.device)
 
         self.model = EisenModuleWrapper(base_model, self.input_name_list, self.output_name_list)
@@ -76,19 +82,35 @@ class EisenServingHandler(object):
         self.initialized = True
 
     def get_metadata(self):
+        """
+        This function returns metadata about the model as JSON
+
+        :return: list
+        """
         return [json.dumps(self.metadata)]
 
     def pre_process(self, data):
         """
-        """
+        Applies pre-processing transform using de-pickled transform chain in the MAR.
 
+        :param data: dictionary containing a collated batch of data
+        :type data: dict
+
+        """
         input_dict = self.pre_process_tform(data)
 
         return input_dict
 
-    def inference(self, input_dict, topk=5):
-        ''' Predict the class (or classes) of an image using a trained deep learning model.
-        '''
+    def inference(self, input_dict):
+        """
+        Performs prediction using the model. Feeds the necessary information to the model starting from the
+        received data and creates an output dictionary as a result.
+
+        :param input_dict: input batch, in form of a dictionary of collated datapoints
+        :type input_dict: dict
+
+        :return: dict
+        """
 
         for name in self.model.input_names:
             input_dict[name] = torch.Tensor(input_dict[name]).to(self.device)
@@ -101,11 +123,27 @@ class EisenServingHandler(object):
         return output_dict
 
     def post_process(self, output_dict):
+        """
+        Applies post-processing transform using de-pickled transform chain in the MAR.
+
+        :param output_dict: dictionary containing the result of inference on a collated batch of data
+        :type output_dict: dict
+        """
+
         prediction = self.post_process_tform(output_dict)
 
         return prediction
 
     def handle(self, data):
+        """
+        Handles one request.
+
+        :param data: dictionary of data
+        :type data: dict
+
+        :return: list
+        """
+
         model_input = self.pre_process(data)
         model_out = self.inference(model_input)
         prediction = self.post_process(model_out)
@@ -119,6 +157,7 @@ _service = EisenServingHandler()
 
 
 def handle(data, context):
+
     if not _service.initialized:
         _service.initialize(context)
 

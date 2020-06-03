@@ -19,6 +19,9 @@ EISEN_SERVING_HANDLER_PATH = os.path.dirname(
 
 
 class ArgClass:
+    """
+    This is just a mock of arguments that would need to be otherwise passed via command line interface.
+    """
     def __init__(self, serialized_file, handler, extra_files, export_path, model_name='model', model_version=None):
         self.model_name = model_name
         self.serialized_file = serialized_file
@@ -36,11 +39,20 @@ class ArgClass:
 class EisenServingMAR:
     """
         This object implements model packaging compliant with PyTorch serving. This kind of packaging
-        is referred will generate a MAR package. This follows the PyTorch standard, which has been documented
-        here https://github.com/pytorch/serve/blob/master/README.md#serve-a-model
+        is referred as a MAR package. It follows the PyTorch standard, which is documented
+        here https://github.com/pytorch/serve/tree/master/model-archiver
 
-        Once the model is packaged it can be used for inference via TorchServe.
+        Once the model is packaged it can be used for inference via TorchServe. Packing the model will
+        in fact result in a <filename>.mar package (which usually is a .tar.gz archive) that can be used
+        through the following command:
 
+        .. code-block:: console
+
+            torchserve --start --ncs --model-store model_zoo --models model.mar
+
+    """
+    def __init__(self, pre_processing, post_processing, meta_data, handler=EISEN_SERVING_HANDLER_PATH):
+        """
         Saving a MAR package for a model requires an Eisen pre-processing transform object,
         Eisen post-processing transform object, a model object (torch.nn.Module) and a metadata dictionary.
 
@@ -67,10 +79,19 @@ class EisenServingMAR:
 
             mar_creator = EisenServingMAR(my_pre_processing, my_post_processing, metadata)
 
-            mar_creator(my_model, '/path/to/archive')
+            mar_creator.pack(my_model, '/path/to/archive')
 
-    """
-    def __init__(self, pre_processing, post_processing, meta_data, handler=EISEN_SERVING_HANDLER_PATH):
+
+        :param pre_processing: pre processing transform object. Will be pickled into a pickle file
+        :type pre_processing: callable
+        :param post_processing: post processing transform object. Will be pickled into a pickle file
+        :type post_processing: callable
+        :param meta_data: dictionary containing meta data about the model (Eg. information about inputs and outputs)
+        :type meta_data: dict
+        :param handler: name or filename of the handler
+        :type handler: str
+
+        """
         self.tmp_dir = tempfile.mkdtemp()
 
         # save transform chain
@@ -90,7 +111,26 @@ class EisenServingMAR:
     def __del__(self):
         shutil.rmtree(self.tmp_dir)
 
-    def pack(self, model, dst_path, model_name='model', model_version='test'):
+    def pack(self, model, dst_path, model_name, model_version, additional_files=None):
+        """
+        Package a model into the MAR archive so that it can be used for serving using TorchServing
+
+        :param model: an object representing a model
+        :type model: torch.nn.Module
+        :param dst_path: the destination base path (do not include the filename) of the MAR
+        :type dst_path: str
+        :param model_name: the name of the model (will be also used to define the prediction endpoint)
+        :type model_name: str
+        :param model_version: a string encoding the version of the model
+        :type model_version: str
+        :param additional_files: an optional list of files that should be included in the MAR
+        :type additional_files: iterable
+
+        :return: None
+        """
+        if additional_files is None:
+            additional_files = []
+
         # save model
         torch.save(model, os.path.join(self.tmp_dir, 'model.pt'))
 
@@ -101,7 +141,7 @@ class EisenServingMAR:
                 os.path.join(self.tmp_dir, 'pre_process_tform.pkl'),
                 os.path.join(self.tmp_dir, 'post_process_tform.pkl'),
                 os.path.join(self.tmp_dir, 'metadata.json')
-            ]),
+            ] + additional_files),
             dst_path,
             model_name,
             model_version
