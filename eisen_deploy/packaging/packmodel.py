@@ -51,7 +51,7 @@ class EisenServingMAR:
             torchserve --start --ncs --model-store model_zoo --models model.mar
 
     """
-    def __init__(self, pre_processing, post_processing, meta_data, handler=EISEN_SERVING_HANDLER_PATH):
+    def __init__(self, pre_processing, post_processing, meta_data, handler=None):
         """
         Saving a MAR package for a model requires an Eisen pre-processing transform object,
         Eisen post-processing transform object, a model object (torch.nn.Module) and a metadata dictionary.
@@ -88,11 +88,14 @@ class EisenServingMAR:
         :type post_processing: callable
         :param meta_data: dictionary containing meta data about the model (Eg. information about inputs and outputs)
         :type meta_data: dict
-        :param handler: name or filename of the handler
+        :param handler: name or filename of the handler. It is an optional parameter which rarely needs to be changed
         :type handler: str
 
         """
         self.tmp_dir = tempfile.mkdtemp()
+
+        if handler is None:
+            handler = EISEN_SERVING_HANDLER_PATH
 
         # save transform chain
         with open(os.path.join(self.tmp_dir, 'pre_process_tform.pkl'), 'wb') as f:
