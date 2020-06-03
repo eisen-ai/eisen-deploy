@@ -101,7 +101,7 @@ class EisenServingHandler(object):
         return output_dict
 
     def post_process(self, output_dict):
-        prediction = self.post_process(output_dict)
+        prediction = self.post_process_tform(output_dict)
 
         return prediction
 
@@ -110,12 +110,9 @@ class EisenServingHandler(object):
         model_out = self.inference(model_input)
         prediction = self.post_process(model_out)
 
-        output_list = []
+        buffer = pickle.dumps(prediction)
 
-        for name in self.output_name_list:
-            output_list.append(prediction[name])
-
-        return output_list
+        return [buffer]
 
 
 _service = EisenServingHandler()
@@ -125,8 +122,15 @@ def handle(data, context):
     if not _service.initialized:
         _service.initialize(context)
 
-    if data is None or data[0].keys() not in _service.input_name_list:
+    if data is not None and hasattr(data, '__getitem__') and 'body' in data[0].keys() and len(data[0]['body']) > 0:
+        data = data[0]['body']
+    else:
+        return _service.get_metadata()
+
+    data = pickle.loads(data)
+
+    if not all([key in data.keys() for key in _service.input_name_list]):
         return _service.get_metadata()
 
     else:
-        return _service.handle(data[0])
+        return _service.handle(data)

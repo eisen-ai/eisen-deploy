@@ -33,7 +33,7 @@ class ArgClass:
         self.force = False
 
 
-class TorchServeMAR:
+class EisenServingMAR:
     """
         This object implements model packaging compliant with PyTorch serving. This kind of packaging
         is referred will generate a MAR package. This follows the PyTorch standard, which has been documented
@@ -53,7 +53,7 @@ class TorchServeMAR:
 
         .. code-block:: python
 
-            from eisen_deploy.packaging import TorchServeMAR
+            from eisen_deploy.packaging import EisenServingMAR
 
             my_model =  # Eg. A torch.nn.Module instance
 
@@ -65,7 +65,7 @@ class TorchServeMAR:
             metadata = {'inputs': [], 'outputs': []}  # metadata dictionary
 
 
-            mar_creator = TorchServeMAR(my_pre_processing, my_post_processing, metadata)
+            mar_creator = EisenServingMAR(my_pre_processing, my_post_processing, metadata)
 
             mar_creator(my_model, '/path/to/archive')
 
