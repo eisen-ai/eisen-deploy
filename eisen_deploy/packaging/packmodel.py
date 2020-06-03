@@ -90,7 +90,7 @@ class TorchServeMAR:
     def __del__(self):
         shutil.rmtree(self.tmp_dir)
 
-    def __call__(self, model, dst_path, model_name='model', model_version=None):
+    def __call__(self, model, dst_path, model_name='model', model_version='test'):
         # save model
         torch.save(model, os.path.join(self.tmp_dir, 'model.pt'))
 
