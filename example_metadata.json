@@ -1,0 +1,29 @@
+{
+  "model": {
+    "type": "dotted.path.to.module",
+    "params": {
+      "num_classes": "10",
+    }
+  },
+
+  "inputs": [
+    {
+      "name": "image",
+      "type": "nd.array",
+      "shape": [-1, 3, 224, 224]
+    }
+  ],
+
+  "outputs": [
+    {
+      "name": "prediction",
+      "type": "nd.array",
+      "shape": [-1]
+    }
+  ],
+
+  "custom": {
+    "field1": "note",
+    "field2": "another note"
+  }
+}
