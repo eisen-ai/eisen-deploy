@@ -41,17 +41,6 @@ class EisenServingClient:
 
         self.metadata = self.get_metadata()
 
-    def get_metadata(self):
-        """
-        Get model metadata as a result of an empty query to the model. This allows to receive information
-        about the model (Eg. its inputs and outputs).
-
-        :return: dict
-        """
-        response = requests.post(url=self.url)
-
-        return response.json()
-
     def input_validation(self, batch):
         assert len(batch.keys()) == len(self.metadata['inputs'])
 
@@ -74,6 +63,17 @@ class EisenServingClient:
 
             elif input['type'] == 'list' or input['type'] == 'str':
                 assert len(batch[key]) == input['shape']
+
+    def get_metadata(self):
+        """
+        Get model metadata as a result of an empty query to the model. This allows to receive information
+        about the model (Eg. its inputs and outputs).
+
+        :return: dict
+        """
+        response = requests.post(url=self.url)
+
+        return response.json()
 
     def predict(self, batch):
         """
