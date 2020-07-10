@@ -8,6 +8,8 @@ def create_metadata(
         output_name_list,
         output_type_list,
         output_shape_list,
+        model_input_list=None,
+        model_output_list=None,
         custom_meta_dict=None,
 ):
     """
@@ -33,15 +35,27 @@ def create_metadata(
     :type output_type_list: list
     :param output_shape_list: List of shapes (list) for output shape Eg. [[-1, 10], [-1]]
     :type output_shape_list: list
+    :param model_input_list: List of input names that should be used as model inputs (default all input_name_list)
+    :type model_input_list: list
+    :param model_output_list: List of output names that should be obtained from the model (default all output_name_list)
+    :type model_output_list: list
     :param custom_meta_dict: A json-serializable dictionary containing custom information (Eg. options or notes)
     :type custom_meta_dict: dict
 
     :return: Dictionary containing metadata in standardized format
 
     """
+    if model_input_list is None:
+        model_input_list = input_name_list
+
+    if model_output_list is None:
+        model_output_list = output_name_list
+
     metadata = {
         'inputs': [],
         'outputs': [],
+        'model_input_list': model_input_list,
+        'model_output_list': model_output_list,
         'custom': {}
     }
 
