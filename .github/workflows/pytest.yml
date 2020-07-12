@@ -24,6 +24,7 @@ jobs:
         pip install -r requirements.txt
         pip install ./
         pip install pytest pytest-cov
+        pip install eisen-core
 
     - name: Test with pytest
       run: |
