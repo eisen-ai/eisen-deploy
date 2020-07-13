@@ -71,11 +71,11 @@ class EisenServingHandler(object):
         self.metadata = json_file_to_dict(metadata_json)
 
         self.input_name_list = []
-        for entry in self.metadata['inputs']:
+        for entry in self.metadata['model_input_list']:
             self.input_name_list.append(entry['name'])
 
         self.output_name_list = []
-        for entry in self.metadata['outputs']:
+        for entry in self.metadata['model_output_list']:
             self.output_name_list.append(entry['name'])
 
         # deserialize pytorch model
@@ -155,6 +155,9 @@ class EisenServingHandler(object):
 
         model_input = self.pre_process(data)
         model_out = self.inference(model_input)
+
+        model_out.update(model_input)  # output dictionary still contains inputs (which may be useful for tforms)
+
         prediction = self.post_process(model_out)
 
         buffer = pickle.dumps(prediction)
