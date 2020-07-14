@@ -70,13 +70,9 @@ class EisenServingHandler(object):
 
         self.metadata = json_file_to_dict(metadata_json)
 
-        self.input_name_list = []
-        for entry in self.metadata['model_input_list']:
-            self.input_name_list.append(entry)
+        self.input_name_list = self.metadata['model_input_list']
 
-        self.output_name_list = []
-        for entry in self.metadata['model_output_list']:
-            self.output_name_list.append(entry)
+        self.output_name_list = self.metadata['model_output_list']
 
         # deserialize pytorch model
         base_model = torch.load(model_pt_path, map_location=self.device)
