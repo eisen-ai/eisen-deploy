@@ -148,13 +148,21 @@ class EisenServingHandler(object):
 
         :return: list
         """
-
-        model_input = self.pre_process(data)
+        input_data = {}
+        for input in self.metadata['inputs']:
+            input_data[input['name']] = data[input['name']]
+            
+        model_input = self.pre_process(input_data)
+        
         model_out = self.inference(model_input)
 
         model_out.update(model_input)  # output dictionary still contains inputs (which may be useful for tforms)
 
         prediction = self.post_process(model_out)
+        
+        output_data = {}
+        for output in self.metadata['outputs']:
+            output_data[output] = prediction[output]
 
         buffer = pickle.dumps(prediction)
 
