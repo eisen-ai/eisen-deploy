@@ -162,9 +162,9 @@ class EisenServingHandler(object):
         
         output_data = {}
         for output in self.metadata['outputs']:
-            output_data[output] = prediction[output]
+            output_data[output['name']] = prediction[output['name']]
 
-        buffer = pickle.dumps(prediction)
+        buffer = pickle.dumps(output_data)
 
         return [buffer]
 
