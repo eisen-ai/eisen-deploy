@@ -72,11 +72,11 @@ class EisenServingHandler(object):
 
         self.input_name_list = []
         for entry in self.metadata['model_input_list']:
-            self.input_name_list.append(entry['name'])
+            self.input_name_list.append(entry)
 
         self.output_name_list = []
         for entry in self.metadata['model_output_list']:
-            self.output_name_list.append(entry['name'])
+            self.output_name_list.append(entry)
 
         # deserialize pytorch model
         base_model = torch.load(model_pt_path, map_location=self.device)
