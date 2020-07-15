@@ -95,7 +95,7 @@ class EisenServingClient:
             prediction = pickle.loads(response.content)
 
         except UnpicklingError:
-            print('Server has not understood the data you have sent! It has therefore returned metadata.')
+            print('There was an error during your request. The server has responded in an unexpected way.')
 
             return response.json()
 
