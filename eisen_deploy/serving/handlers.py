@@ -1,10 +1,12 @@
 import logging
 import os
 import torch
-import pickle
 import json
+import pickle
+import msgpack
 
 from eisen.utils import EisenModuleWrapper
+from eisen_deploy.utils import encode_data, decode_data
 
 
 logger = logging.getLogger(__name__)
@@ -164,7 +166,7 @@ class EisenServingHandler(object):
         for output in self.metadata['outputs']:
             output_data[output['name']] = prediction[output['name']]
 
-        buffer = pickle.dumps(output_data)
+        buffer = msgpack.packb(prediction, default=encode_data, use_bin_type=True)
 
         return [buffer]
 
@@ -182,7 +184,7 @@ def handle(data, context):
     else:
         return _service.get_metadata()
 
-    data = pickle.loads(data)
+    data = msgpack.unpackb(data, object_hook=decode_data, raw=False)
 
     if not all([key in data.keys() for key in _service.input_name_list]):
         return _service.get_metadata()

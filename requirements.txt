@@ -3,3 +3,4 @@ torch==1.5.0
 torchvision==0.6.0
 torch-model-archiver==0.1.0b20200409
 torchserve==0.0.1b20200409
+msgpack >= 1.0.0
