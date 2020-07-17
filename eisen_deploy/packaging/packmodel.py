@@ -2,7 +2,7 @@ import tempfile
 import shutil
 import torch
 import os
-import pickle
+import dill
 import json
 import inspect
 
@@ -82,9 +82,9 @@ class EisenServingMAR:
             mar_creator.pack(my_model, '/path/to/archive')
 
 
-        :param pre_processing: pre processing transform object. Will be pickled into a pickle file
+        :param pre_processing: pre processing transform object. Will be dilled into a dill file
         :type pre_processing: callable
-        :param post_processing: post processing transform object. Will be pickled into a pickle file
+        :param post_processing: post processing transform object. Will be dilled into a dill file
         :type post_processing: callable
         :param meta_data: dictionary containing meta data about the model (Eg. information about inputs and outputs)
         :type meta_data: dict
@@ -99,11 +99,11 @@ class EisenServingMAR:
 
         # save transform chain
         with open(os.path.join(self.tmp_dir, 'pre_process_tform.pkl'), 'wb') as f:
-            pickle.dump(pre_processing, f)
+            dill.dump(pre_processing, f)
 
         # save transform chain
         with open(os.path.join(self.tmp_dir, 'post_process_tform.pkl'), 'wb') as f:
-            pickle.dump(post_processing, f)
+            dill.dump(post_processing, f)
 
         # save metadata
         with open(os.path.join(self.tmp_dir, 'metadata.json'), "w") as f:

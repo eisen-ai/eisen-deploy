@@ -2,7 +2,7 @@ import torch
 import tempfile
 import os
 import shutil
-import pickle
+import dill
 import numpy as np
 import json
 
@@ -10,16 +10,22 @@ from eisen_deploy.packaging import EisenServingMAR
 from eisen_deploy.packaging import create_metadata
 
 
-class IdentityTForm:
+class AddFieldTForm:
+    def __init__(self, field, value):
+        self.field = field
+        self.value = value
+
     def __call__(self, data):
+        data[self.field] = self.value
+
         return data
 
 
 class TestEisenServingMAR:
     def setup_class(self):
         self.model = torch.nn.Conv1d(in_channels=1, out_channels=1, kernel_size=3, padding=0)
-        self.pre_processing = IdentityTForm()
-        self.post_processing = IdentityTForm()
+        self.pre_processing = AddFieldTForm('pre', True)
+        self.post_processing = AddFieldTForm('post', True)
 
         self.metadata = {
             'inputs': [{'name': 'input', 'type': 'np.ndarray', 'shape': [-1]}],
@@ -53,14 +59,14 @@ class TestEisenServingMAR:
         shutil.unpack_archive(os.path.join(dst_path, 'test_model.mar'), unpack_mar_path, "zip")
 
         with open(os.path.join(unpack_mar_path, "pre_process_tform.pkl"), "rb") as f:
-            pre_process_tform = pickle.load(f)
+            pre_process_tform = dill.load(f)
 
         with open(os.path.join(unpack_mar_path, "post_process_tform.pkl"), "rb") as f:
-            post_process_tform = pickle.load(f)
+            post_process_tform = dill.load(f)
 
-        assert isinstance(pre_process_tform, IdentityTForm)
+        assert isinstance(pre_process_tform, AddFieldTForm)
 
-        assert isinstance(post_process_tform, IdentityTForm)
+        assert isinstance(post_process_tform, AddFieldTForm)
 
         model = torch.load(os.path.join(unpack_mar_path, "model.pt"))
 
