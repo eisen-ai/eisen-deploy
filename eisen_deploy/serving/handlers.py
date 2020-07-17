@@ -1,6 +1,7 @@
 import logging
 import os
 import torch
+import dill
 import json
 import pickle
 import msgpack
@@ -62,10 +63,10 @@ class EisenServingHandler(object):
 
         # unpickle serialized transform chain
         with open(pre_processing_pkl, "rb") as f:
-            self.pre_process_tform = pickle.load(f)
+            self.pre_process_tform = dill.load(f)
 
         with open(post_processing_pkl, "rb") as f:
-            self.post_process_tform = pickle.load(f)
+            self.post_process_tform = dill.load(f)
 
         # Metadata about the model
         metadata_json = os.path.join(model_dir, "metadata.json")
