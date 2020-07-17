@@ -1,8 +1,10 @@
 import requests
 import pickle
 import numpy as np
+import msgpack
 
 from pickle import UnpicklingError
+from eisen_deploy.utils import decode_data, encode_data
 
 
 class EisenServingClient:
@@ -87,12 +89,12 @@ class EisenServingClient:
         if self.validate_inputs:
             self.input_validation(batch)
 
-        buffer = pickle.dumps(batch)
+        buffer = msgpack.packb(batch, default=encode_data, use_bin_type=True)
 
         response = requests.post(url=self.url, data=buffer)
 
         try:
-            prediction = pickle.loads(response.content)
+            prediction = msgpack.unpackb(response.content, object_hook=decode_data, raw=False)
 
         except UnpicklingError:
             print('There was an error during your request. The server has responded in an unexpected way.')
