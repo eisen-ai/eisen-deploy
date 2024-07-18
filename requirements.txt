@@ -2,6 +2,6 @@ numpy>=1.18.0
 torch==1.5.0
 torchvision==0.6.0
 torch-model-archiver==0.1.0b20200409
-torchserve==0.0.1b20200409
+torchserve==0.11.0
 msgpack >= 1.0.0
 dill>=0.3.2
